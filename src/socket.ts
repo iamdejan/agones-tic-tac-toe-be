@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { Character } from "./character";
 import { Event } from "./event";
 
-const players = new Map<String, String>(); // TODO: refactor to singleton in other files
+const players = new Map<string, string>(); // TODO: refactor to singleton in other files
 
 function onPlayerJoined(socket: Socket) {
   let character: Character;
