@@ -150,6 +150,7 @@ function onPlayerMoves(socket: Socket, point: Point) {
 
   if (isDraw()) {
     broadcast(socket, Event.DRAW, {});
+    return;
   }
 
   let nextPlayer = getNextPlayer(current);
