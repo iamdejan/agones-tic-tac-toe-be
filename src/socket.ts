@@ -2,8 +2,8 @@ import { Socket } from "socket.io";
 import { Character } from "./character";
 import { Event } from "./event";
 
-const playerToCharMap = new Map<string, string>();
-const charToPlayerMap = new Map<string, string>();
+const playerToCharMap = new Map<string, Character>();
+const charToPlayerMap = new Map<Character, string>();
 
 const board = [
   ["", "", ""],
@@ -42,7 +42,7 @@ function onPlayerJoined(socket: Socket) {
   }
 }
 
-function isWinningVertically(player: string): boolean {
+function isWinningVertically(player: Character): boolean {
   for (let c = 0; c < 3; c++) {
     let count = 0;
     for (let r = 0; r < 3; r++) {
@@ -58,7 +58,7 @@ function isWinningVertically(player: string): boolean {
   return false;
 }
 
-function isWinningHorizontally(player: string): boolean {
+function isWinningHorizontally(player: Character): boolean {
   for (let r = 0; r < 3; r++) {
     let count = 0;
     for (let c = 0; c < 3; c++) {
@@ -74,7 +74,7 @@ function isWinningHorizontally(player: string): boolean {
   return false;
 }
 
-function isWinningDiagonally(player: string): boolean {
+function isWinningDiagonally(player: Character): boolean {
   let count = 0;
   for (let i = 0; i < 3; i++) {
     if (board[i][i] === player) {
@@ -98,7 +98,7 @@ function isWinningDiagonally(player: string): boolean {
   return false;
 }
 
-function isWinning(player: string): boolean {
+function isWinning(player: Character): boolean {
   if (isWinningVertically(player)) {
     return true;
   }
@@ -114,21 +114,7 @@ function isWinning(player: string): boolean {
   return false;
 }
 
-function onPlayerMoves(socket: Socket, point: Point) {
-  const player: string = playerToCharMap.get(socket.id)!;
-  if (board[point.row][point.col] !== "") {
-    broadcast(socket, Event.INVALID_MOVE, { player });
-    return;
-  }
-
-  board[point.row][point.col] !== player;
-
-  if (isWinning(player)) {
-    broadcast(socket, Event.PLAYER_WINS, { player });
-    return;
-  }
-
-  // draw
+function isDraw(): boolean {
   let emptySlotCount = 0;
   for (let r = 0; r < 3; r++) {
     for (let c = 0; c < 3; c++) {
@@ -137,17 +123,36 @@ function onPlayerMoves(socket: Socket, point: Point) {
       }
     }
   }
-  if (emptySlotCount === 0) {
+
+  return emptySlotCount === 0;
+}
+
+function getNextPlayer(current: Character): Character {
+  if (current === Character.X) {
+    return Character.O;
+  }
+  return Character.X;
+}
+
+function onPlayerMoves(socket: Socket, point: Point) {
+  const current: Character = playerToCharMap.get(socket.id)!;
+  if (board[point.row][point.col] !== "") {
+    broadcast(socket, Event.INVALID_MOVE, { player: current });
+    return;
+  }
+
+  board[point.row][point.col] = current;
+
+  if (isWinning(current)) {
+    broadcast(socket, Event.PLAYER_WINS, { player: current });
+    return;
+  }
+
+  if (isDraw()) {
     broadcast(socket, Event.DRAW, {});
   }
 
-  let nextPlayer: string;
-  if (player == Character.X) {
-    nextPlayer = Character.O;
-  } else {
-    nextPlayer = Character.X;
-  }
-
+  let nextPlayer = getNextPlayer(current);
   broadcast(socket, Event.PLAYER_MOVES, { player: nextPlayer });
 }
 
