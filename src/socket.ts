@@ -21,18 +21,20 @@ function broadcast(socket: Socket, event: string, payload: unknown) {
   socket.broadcast.emit(event, payload);
 }
 
-function onPlayerJoined(socket: Socket) {
-  let character: Character;
+function getCharacter(): Character {
   if (charToPlayerMap.has(Character.X)) {
-    character = Character.O;
-  } else {
-    character = Character.X;
+    return Character.O;
   }
+  return Character.X;
+}
+
+function onPlayerJoined(socket: Socket) {
+  let character = getCharacter();
   playerToCharMap.set(socket.id, character);
   charToPlayerMap.set(character, socket.id);
   console.log(Event.ON_PLAYER_JOINED + " to game with character " + character);
 
-  socket.emit(Event.PLAYER_JOINED, { socketId: socket.id, character });
+  broadcast(socket, Event.PLAYER_JOINED, { socketId: socket.id, character });
 
   if (playerToCharMap.size === 2) {
     broadcast(socket, Event.GAME_STARTED, {});
@@ -136,7 +138,7 @@ function onPlayerMoves(socket: Socket, point: Point) {
     }
   }
   if (emptySlotCount === 0) {
-    socket.emit(Event.DRAW);
+    broadcast(socket, Event.DRAW, {});
   }
 
   let nextPlayer: string;
