@@ -50,7 +50,7 @@ function isWinningVertically(player: Character): boolean {
         count++;
       }
     }
-    if (count == 3) {
+    if (count === 3) {
       return true;
     }
   }
