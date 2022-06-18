@@ -1,0 +1,22 @@
+name: CI for Agones Tic-Tac-Toe BE
+on:
+  push:
+
+jobs:
+  Main:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Clone repository code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: install
+      - name: Run lint
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: lint
+      - name: Run coverage
+        uses: borales/actions-yarn@v3.0.0
+        with:
+          cmd: coverage
