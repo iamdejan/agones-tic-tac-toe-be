@@ -159,7 +159,7 @@ function onPlayerMoves(socket: Socket, point: Point) {
 
 export default function handle(socket: Socket) {
   socket.on(Event.ON_PLAYER_JOINED, () => onPlayerJoined(socket));
-  socket.on(Event.ON_PLAYER_MOVES, (point: Point) =>
-    onPlayerMoves(socket, point)
+  socket.on(Event.ON_PLAYER_MOVES, ({row, col}: Point) =>
+    onPlayerMoves(socket, {row, col})
   );
 }
