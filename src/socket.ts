@@ -5,7 +5,7 @@ import { Event } from "./event";
 const playerToCharMap = new Map<string, Character>();
 const charToPlayerMap = new Map<Character, string>();
 
-const board = [
+export const board = [
   ["", "", ""],
   ["", "", ""],
   ["", "", ""],
@@ -29,16 +29,15 @@ function getCharacter(): Character {
 }
 
 function onPlayerJoined(socket: Socket) {
-  let character = getCharacter();
+  const character = getCharacter();
   playerToCharMap.set(socket.id, character);
   charToPlayerMap.set(character, socket.id);
-  console.log(Event.ON_PLAYER_JOINED + " to game with character " + character);
 
   broadcast(socket, Event.PLAYER_JOINED, { socketId: socket.id, character });
 
   if (playerToCharMap.size === 2) {
     broadcast(socket, Event.GAME_STARTED, {});
-    broadcast(socket, Event.PLAYER_MOVES, { player: Character.X });
+    broadcast(socket, Event.PLAYER_TURN, { player: Character.X });
   }
 }
 
@@ -98,7 +97,7 @@ function isWinningDiagonally(player: Character): boolean {
   return false;
 }
 
-function isWinning(player: Character): boolean {
+export function isWinning(player: Character): boolean {
   if (isWinningVertically(player)) {
     return true;
   }
@@ -114,7 +113,7 @@ function isWinning(player: Character): boolean {
   return false;
 }
 
-function isDraw(): boolean {
+export function isDraw(): boolean {
   let emptySlotCount = 0;
   for (let r = 0; r < 3; r++) {
     for (let c = 0; c < 3; c++) {
@@ -127,7 +126,7 @@ function isDraw(): boolean {
   return emptySlotCount === 0;
 }
 
-function getNextPlayer(current: Character): Character {
+export function getNextPlayer(current: Character): Character {
   if (current === Character.X) {
     return Character.O;
   }
@@ -153,13 +152,13 @@ function onPlayerMoves(socket: Socket, point: Point) {
     return;
   }
 
-  let nextPlayer = getNextPlayer(current);
-  broadcast(socket, Event.PLAYER_MOVES, { player: nextPlayer });
+  const nextPlayer = getNextPlayer(current);
+  broadcast(socket, Event.PLAYER_TURN, { player: nextPlayer });
 }
 
 export default function handle(socket: Socket) {
   socket.on(Event.ON_PLAYER_JOINED, () => onPlayerJoined(socket));
-  socket.on(Event.ON_PLAYER_MOVES, ({row, col}: Point) =>
+  socket.on(Event.ON_PLAYER_MOVED, ({row, col}: Point) =>
     onPlayerMoves(socket, {row, col})
   );
 }
