@@ -21,6 +21,10 @@ function broadcast(socket: Socket, event: string, payload: unknown) {
   socket.broadcast.emit(event, payload);
 }
 
+function broadcastPlayerTurn(socket: Socket, character: Character) {
+  broadcast(socket, Event.PLAYER_TURN, { character });
+}
+
 function getCharacter(): Character {
   if (charToPlayerMap.has(Character.X)) {
     return Character.O;
@@ -37,15 +41,15 @@ function onPlayerJoined(socket: Socket) {
 
   if (playerToCharMap.size === 2) {
     broadcast(socket, Event.GAME_STARTED, {});
-    broadcast(socket, Event.PLAYER_TURN, { player: Character.X });
+    broadcastPlayerTurn(socket, Character.X);
   }
 }
 
-function isWinningVertically(player: Character): boolean {
+function isWinningVertically(character: Character): boolean {
   for (let c = 0; c < 3; c++) {
     let count = 0;
     for (let r = 0; r < 3; r++) {
-      if (board[r][c] === player) {
+      if (board[r][c] === character) {
         count++;
       }
     }
@@ -57,11 +61,11 @@ function isWinningVertically(player: Character): boolean {
   return false;
 }
 
-function isWinningHorizontally(player: Character): boolean {
+function isWinningHorizontally(character: Character): boolean {
   for (let r = 0; r < 3; r++) {
     let count = 0;
     for (let c = 0; c < 3; c++) {
-      if (board[r][c] === player) {
+      if (board[r][c] === character) {
         count++;
       }
     }
@@ -97,16 +101,16 @@ function isWinningDiagonally(player: Character): boolean {
   return false;
 }
 
-export function isWinning(player: Character): boolean {
-  if (isWinningVertically(player)) {
+export function isWinning(current: Character): boolean {
+  if (isWinningVertically(current)) {
     return true;
   }
 
-  if (isWinningHorizontally(player)) {
+  if (isWinningHorizontally(current)) {
     return true;
   }
 
-  if (isWinningDiagonally(player)) {
+  if (isWinningDiagonally(current)) {
     return true;
   }
 
@@ -126,7 +130,7 @@ export function isDraw(): boolean {
   return emptySlotCount === 0;
 }
 
-export function getNextPlayer(current: Character): Character {
+export function getNextCharacter(current: Character): Character {
   if (current === Character.X) {
     return Character.O;
   }
@@ -136,14 +140,20 @@ export function getNextPlayer(current: Character): Character {
 function onPlayerMoves(socket: Socket, point: Point) {
   const current: Character = playerToCharMap.get(socket.id)!;
   if (board[point.row][point.col] !== "") {
-    broadcast(socket, Event.INVALID_MOVE, { player: current });
+    broadcast(socket, Event.INVALID_MOVE, {
+      player: socket.id,
+      character: current,
+    });
     return;
   }
 
   board[point.row][point.col] = current;
 
   if (isWinning(current)) {
-    broadcast(socket, Event.PLAYER_WINS, { player: current });
+    broadcast(socket, Event.PLAYER_WINS, {
+      player: socket.id,
+      character: current,
+    });
     return;
   }
 
@@ -152,13 +162,13 @@ function onPlayerMoves(socket: Socket, point: Point) {
     return;
   }
 
-  const nextPlayer = getNextPlayer(current);
-  broadcast(socket, Event.PLAYER_TURN, { player: nextPlayer });
+  const nextCharacter = getNextCharacter(current);
+  broadcastPlayerTurn(socket, nextCharacter);
 }
 
 export default function handle(socket: Socket) {
   socket.on(Event.ON_PLAYER_JOINED, () => onPlayerJoined(socket));
-  socket.on(Event.ON_PLAYER_MOVED, ({row, col}: Point) =>
-    onPlayerMoves(socket, {row, col})
+  socket.on(Event.ON_PLAYER_MOVED, ({ row, col }: Point) =>
+    onPlayerMoves(socket, { row, col })
   );
 }

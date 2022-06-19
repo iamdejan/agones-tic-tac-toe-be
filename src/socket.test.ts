@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { Character } from './character';
-import { board, getNextPlayer, isDraw, isWinning } from './socket';
+import { board, getNextCharacter, isDraw, isWinning } from './socket';
 
 beforeEach(() => {
   for(let r = 0; r < 3; r++) {
@@ -61,7 +61,7 @@ describe("game ends", () => {
 
 describe("on game play", () => {
   it("next player is correct", () => {
-    expect(getNextPlayer(Character.X)).toBe(Character.O);
-    expect(getNextPlayer(Character.O)).toBe(Character.X);
+    expect(getNextCharacter(Character.X)).toBe(Character.O);
+    expect(getNextCharacter(Character.O)).toBe(Character.X);
   });
 });
