@@ -6,7 +6,12 @@ const io = new Server({
 });
 
 io.on("connection", (socket) => {
+  console.log(`socket ${socket.id} is connected`);
   handle(socket);
+
+  socket.on("disconnected", () => {
+    console.log(`socket ${socket.id} is disconnected`);
+  });
 });
 
-io.listen(3001);
+io.listen(4000);
