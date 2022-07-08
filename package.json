@@ -7,7 +7,7 @@
     "license": "MIT",
     "scripts": {
         "lint": "eslint . --ext .ts",
-        "build": "rm -r dist && tsc --strict",
+        "build": "rm -rf dist && tsc --strict",
         "start": "node dist/src/app.js",
         "dev": "nodemon --config nodemon.json src/app.ts",
         "test": "vitest run",
