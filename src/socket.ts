@@ -22,7 +22,8 @@ function broadcast(socket: Socket, event: string, payload: unknown) {
 }
 
 function broadcastPlayerTurn(socket: Socket, character: Character) {
-  broadcast(socket, Event.PLAYER_TURN, { character });
+  const player = charToPlayerMap.get(character);
+  broadcast(socket, Event.PLAYER_TURN, { player, character });
 }
 
 function getCharacter(): Character {
@@ -148,6 +149,11 @@ function onPlayerMoves(socket: Socket, point: Point) {
   }
 
   board[point.row][point.col] = current;
+  socket.broadcast.emit(Event.MOVE_COMPLETED, {
+    row: point.row,
+    col: point.col,
+    character: current,
+  });
 
   if (isWinning(current)) {
     broadcast(socket, Event.PLAYER_WINS, {
