@@ -26,6 +26,11 @@ function broadcastPlayerTurn(socket: Socket, character: Character) {
   broadcast(socket, Event.PLAYER_TURN, { player, character });
 }
 
+function startGame(socket: Socket) {
+  const player = charToPlayerMap.get(Character.X);
+  broadcast(socket, Event.GAME_STARTED, { player, character: Character.X });
+}
+
 function getCharacter(): Character {
   if (charToPlayerMap.has(Character.X)) {
     return Character.O;
@@ -41,8 +46,7 @@ function onPlayerJoined(socket: Socket) {
   broadcast(socket, Event.PLAYER_JOINED, { socketId: socket.id, character });
 
   if (playerToCharMap.size === 2) {
-    broadcast(socket, Event.GAME_STARTED, {});
-    broadcastPlayerTurn(socket, Character.X);
+    startGame(socket);
   }
 }
 
@@ -149,7 +153,7 @@ function onPlayerMoves(socket: Socket, point: Point) {
   }
 
   board[point.row][point.col] = current;
-  socket.broadcast.emit(Event.MOVE_COMPLETED, {
+  broadcast(socket, Event.MOVE_COMPLETED, {
     row: point.row,
     col: point.col,
     character: current,
