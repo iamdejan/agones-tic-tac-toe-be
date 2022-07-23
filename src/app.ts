@@ -46,6 +46,9 @@ const io = new Server({
   transports: ["websocket"],
 });
 
+setAsHealthy();
+setAsReady();
+
 io.on("connection", (socket) => {
   console.log(`socket ${socket.id} is connected`);
   handle(socket);
@@ -53,9 +56,6 @@ io.on("connection", (socket) => {
   socket.on("disconnected", () => {
     console.log(`socket ${socket.id} is disconnected`);
   });
-
-  setAsHealthy();
-  setAsReady();
 });
 
 io.listen(4000);
