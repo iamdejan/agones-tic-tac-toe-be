@@ -1,4 +1,4 @@
-name: CI for Agones Tic-Tac-Toe BE
+name: Docker pipeline for Agones Tic-Tac-Toe BE
 on:
   push:
     branches:
