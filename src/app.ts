@@ -14,7 +14,7 @@ function setAsHealthy() {
     redirect: "follow",
   };
 
-  fetch(`http://localhost:${process.env.AGONES_SDK_HTTP_PORT}/ready`, requestOptions)
+  fetch(`http://localhost:${process.env.AGONES_SDK_HTTP_PORT}/health`, requestOptions)
     .then((response) => response.text())
     .then((result) => console.log(result))
     .catch((error) => console.log("error", error));
