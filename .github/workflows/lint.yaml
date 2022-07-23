@@ -1,4 +1,4 @@
-name: CI for Agones Tic-Tac-Toe BE
+name: Lint check for Agones Tic-Tac-Toe BE
 on:
   push:
 
